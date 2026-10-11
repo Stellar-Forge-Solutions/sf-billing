@@ -7,7 +7,7 @@
 There is no hardware to buy except a Bluetooth thermal printer, no software to install on a computer, and no training needed. If you can use WhatsApp, you can use this.
 
 > **Who is this README for?**
-> Developers, yes, but also **video creators, marketers, sales people and support staff**. Sections 1 to 14 explain the product in plain language so you can make demo videos, reels, posts and training material without reading any code. Technical details are at the end (sections 15 to 18).
+> Developers, yes, but also **video creators, marketers, sales people and support staff**. Sections 1 to 16 explain the product in plain language so you can make demo videos, reels, posts and training material without reading any code. Technical details are at the end (sections 17 to 19).
 
 ---
 
@@ -24,13 +24,14 @@ There is no hardware to buy except a Bluetooth thermal printer, no software to i
 9. [Connecting the thermal printer (one-time setup)](#9-connecting-the-thermal-printer-one-time-setup)
 10. [Business use cases and real-life examples](#10-business-use-cases-and-real-life-examples)
 11. [Signup, trial and account flow](#11-signup-trial-and-account-flow)
-12. [How it compares](#12-how-it-compares)
-13. [Honest limits (what it does NOT do)](#13-honest-limits-what-it-does-not-do)
-14. [Video and marketing kit](#14-video-and-marketing-kit)
-15. [FAQ](#15-faq)
-16. [Tech stack and project structure](#16-tech-stack-and-project-structure)
-17. [Deploy and configuration](#17-deploy-and-configuration)
-18. [Developer notes](#18-developer-notes)
+12. [Plans and pricing](#12-plans-and-pricing)
+13. [How it compares](#13-how-it-compares)
+14. [Honest limits (what it does NOT do)](#14-honest-limits-what-it-does-not-do)
+15. [Video and marketing kit](#15-video-and-marketing-kit)
+16. [FAQ](#16-faq)
+17. [Tech stack and project structure](#17-tech-stack-and-project-structure)
+18. [Deploy and configuration](#18-deploy-and-configuration)
+19. [Developer notes](#19-developer-notes)
 
 ---
 
@@ -45,7 +46,7 @@ There is no hardware to buy except a Bluetooth thermal printer, no software to i
 | **Sharing** | PDF invoice sent through WhatsApp with a ready-written message. |
 | **Payments** | Optional UPI QR printed on the bill with the **exact amount** filled in, so customers scan and pay. |
 | **Languages** | The app screens are in English. The printer setup guide is in **English, Hindi and Marathi**. |
-| **Free trial** | 15 days, starts when the shop is approved. |
+| **Free trial** | 15 days, starts when the shop is approved. After that: Basic plan at ₹99 per month or ₹799 per year. |
 | **Needs internet?** | Yes. Bills are saved online, so the phone needs a data or Wi-Fi connection. |
 
 **Taglines you can use**
@@ -83,7 +84,7 @@ Small vendors who today write bills by hand, or give no bill at all, and want so
 
 ### Who it is not (yet) for
 
-Large supermarkets with barcode scanners, stock control and many billing counters. See [Honest limits](#13-honest-limits-what-it-does-not-do).
+Large supermarkets with barcode scanners, stock control and many billing counters. See [Honest limits](#14-honest-limits-what-it-does-not-do).
 
 ### Where these people are
 
@@ -236,7 +237,7 @@ Remember to change quantities if needed; you can tap **+** and **−** on any li
 ### 5.10 Owner vs staff
 
 - On the basic plan there is **one user per shop**, and that user sees everything, including sales totals.
-- On Pro deployments, an owner email list can be set so that **staff do not see money totals** (sales amounts, staff sales, cancel permission), while they can still create and print bills. Each bill records **who created it**.
+- On the Pro plan, an owner email list is set up so that **staff cannot see your sales totals**: today's sales on Home, sales totals and bill amounts on the Dashboard, customer totals, sales by staff and Excel exports are hidden, and only the owner can cancel printed bills. Staff can still create, print and share bills. Each bill records **who created it**. See [Plans and pricing](#12-plans-and-pricing) for the full table.
 
 ---
 
@@ -423,7 +424,7 @@ A customer picks up clothes ordered last week and wants a bill dated the order d
 Orders come on WhatsApp. The baker bills the customer name, adds items, and sends the PDF invoice back on WhatsApp with the UPI QR so the customer can pay straight away.
 
 ### Example F: Shop with two helpers
-Each helper bills from their own login (Pro setup). The owner opens the dashboard and sees **sales by staff** and which helper created which bill.
+Each helper bills from their own login (Pro plan). The helpers cannot see the shop's earnings. The owner opens the dashboard and sees the totals, **sales by staff** and which helper created which bill.
 
 ### Business benefits to mention in videos
 
@@ -449,14 +450,70 @@ Create account  ->  Under review (about 1 working hour)  ->  Approved on WhatsAp
 2. The shop goes to **review**. The Stellar Forge team checks within **1 hour, 9 am to 9 pm IST**, and sends a WhatsApp message.
 3. On approval, the **15-day free trial** starts.
 4. In the **last 5 days** of the trial, an orange banner shows the days left.
-5. When the trial ends or the account is put on hold, the shop is in **view-only** mode: bills can be viewed, but new bills, printing, sharing and exports are off.
+5. When the trial ends or the account is put on hold, the shop is in **view-only** mode: bills can be viewed, but new bills, printing, sharing and exports are off. The **Upgrade to Basic plan** button (see [Plans and pricing](#12-plans-and-pricing)) is shown in the banner, on Settings and on Home.
 6. Other states shown to users: **Account not approved** (with a note) and **Account on hold**.
 
 Spam protection on signup: disposable email domains are blocked, Gmail aliases are treated as one address, and a hidden trap field catches bots.
 
 ---
 
-## 12. How it compares
+## 12. Plans and pricing
+
+| | **Free trial** | **Basic plan** | **Pro plan** |
+|---|---|---|---|
+| **Price** | Free for 15 days (starts when the shop is approved) | **₹99 per month**, or **₹799 per year** (about a third cheaper) | **₹199 per month**, or **₹1,599 per year** |
+| **Best for** | Trying the app | Owner billing alone | Shops with helpers at the counter |
+| **Users** | 1 | 1 | Owner plus staff logins |
+| **Bills** | Unlimited | Unlimited | Unlimited |
+| **Bluetooth thermal printing (58 / 80 mm)** | Yes | Yes | Yes |
+| **WhatsApp PDF bills and UPI QR** | Yes | Yes | Yes |
+| **Dashboard, reports and Excel export** | Yes | Yes | Yes |
+| **Owner and staff roles** (staff cannot see your sales totals, earnings or reports) | No | No | Yes |
+| **Sales by staff, and who created each bill** | No | No | Yes |
+| **Support** | Standard | Standard | Priority WhatsApp support |
+| **After it ends** | View-only mode | Continues while the plan is active | Continues while the plan is active |
+
+**Why shops choose Pro: your helpers can bill, but they cannot see your earnings**
+
+Many owners hesitate to let a helper use the billing phone because the dashboard shows how much the shop earns. With Pro, you keep control:
+
+| What | Owner | Staff |
+|---|---|---|
+| Create bills, save drafts, print, repeat bills | Yes | Yes |
+| Send bills on WhatsApp | Yes | Yes |
+| **Today's sales amount on the Home screen** | Yes | **Hidden** |
+| **Sales total on the Dashboard** (today, 7 days, 30 days, all time) | Yes | **Hidden** |
+| **Bill amounts in the Dashboard list** | Yes | **Hidden** |
+| **Customer-wise total amount** | Yes | **Hidden** |
+| **Sales by staff** (who sold how much) | Yes | **Hidden** |
+| **Excel exports** (Bills and Items sold) | Yes | **Hidden** |
+| **Cancel a printed bill** | Yes | **Hidden** |
+| **Clear old drafts in bulk** | Yes | **Hidden** |
+| Every bill records who created it | Yes | Yes |
+
+What staff can still see: the amount of the bill they are making, the printed receipt, and the details of a single bill they open. They cannot see your day's earnings, your totals or your reports. If you need even single-bill amounts hidden from staff, tell us.
+
+**How Pro is set up:** Pro is activated by the Stellar Forge team on request. After you pay, the team adds the staff logins and the owner and staff settings for your shop, so please message us on WhatsApp first (the **Ask about Pro plan** button in the app does this). Basic stays at one user per shop.
+
+**Where plans show in the app**
+
+- **Settings page, at the very top:** a plan card with the plan status (trial days left, Basic active, or trial ended), the Basic price and features, an **Upgrade to Basic plan** button, and below it the Pro price and features with an **Ask about Pro plan** button.
+- **Home page:** a smaller plan card above the action buttons with the Basic price, the upgrade button and a one-line Pro summary with its button.
+- **Trial banner:** the orange banner (last 5 days of the trial) and the red view-only banner both include an **Upgrade to Basic plan** link.
+
+**How upgrading works today**
+
+1. The shop owner taps **Upgrade to Basic plan**.
+2. WhatsApp opens a chat with **+91 92702 43271** and a ready message asking for the monthly Basic subscription. The message already includes the shop name, mobile number and login email.
+3. The Stellar Forge team shares the payment details (for example a UPI payment).
+4. After payment, the team sets the shop's `paid_until` date in the admin dashboard and the shop continues without any other change.
+5. Once the plan is active, the card shows **Basic plan active** with the end date, and the button changes to **Renew plan on WhatsApp**.
+
+**Change prices or the WhatsApp number:** edit `src/lib/plans.js` only (`BASIC_PLAN`, `PRO_PLAN`, `UPGRADE_WHATSAPP`). The in-app cards update automatically. Remember to update this table and any videos or posts too.
+
+---
+
+## 13. How it compares
 
 | | Handwritten bill | Big POS machine / desktop software | **Stellar Forge Billing** |
 |---|---|---|---|
@@ -471,7 +528,7 @@ Spam protection on signup: disposable email domains are blocked, Gmail aliases a
 
 ---
 
-## 13. Honest limits (what it does NOT do)
+## 14. Honest limits (what it does NOT do)
 
 Be clear about these in videos and sales calls so nobody feels misled.
 
@@ -480,7 +537,7 @@ Be clear about these in videos and sales calls so nobody feels misled.
 - **No barcode scanning.** Items are typed or picked from suggestions.
 - **No automatic GST calculation or tax invoices with CGST/SGST split.** Your GSTIN prints on the receipt, and the total is what you enter. If you need tax breakup bills, tell your accountant.
 - **Prices are entered on every bill.** This is deliberate, because prices change often. A "last price" hint helps.
-- **One user per shop on the basic plan.** Multiple staff logins and hiding money from staff belong to the Pro setup.
+- **One user per shop on the Basic plan.** Multiple staff logins and hiding money from staff belong to the Pro plan.
 - **Customer name only.** No customer database with phone and address, no pending-payment or credit (udhaar) ledger.
 - **Rupees only.** Built for India (INR, IST, +91 numbers).
 - **WhatsApp sends a link.** The invoice is a PDF link in the message, not an attached file, and the vendor taps send in WhatsApp.
@@ -489,7 +546,7 @@ Be clear about these in videos and sales calls so nobody feels misled.
 
 ---
 
-## 14. Video and marketing kit
+## 15. Video and marketing kit
 
 ### 14.1 Key messages (pick 2 or 3 per video)
 
@@ -588,7 +645,7 @@ Caption starter: *"Bill banao, print karo, WhatsApp karo. Sirf 10 second mein. 1
 
 ---
 
-## 15. FAQ
+## 16. FAQ
 
 **Do I need a computer?** No. A phone is enough.
 
@@ -612,9 +669,11 @@ Caption starter: *"Bill banao, print karo, WhatsApp karo. Sirf 10 second mein. 1
 
 **Can I get my data in Excel?** Yes. In the Dashboard, export **Bills** or **Items sold**. The files open directly in Excel or Google Sheets.
 
-**Can my staff use it?** Basic plan: one user per shop. Pro setup: owner and staff roles, with staff not seeing money totals.
+**Can my staff use it?** Basic plan: one user per shop. Pro plan (₹199 per month or ₹1,599 per year): staff logins who can bill and print but cannot see your sales totals, earnings, reports or exports, and sales by staff for you. Message us on WhatsApp to set it up.
 
-**What happens after the free trial?** The shop becomes view-only until the plan continues. Existing bills remain visible.
+**What happens after the free trial?** The shop becomes view-only until the plan continues. Existing bills remain visible. Tap **Upgrade to Basic plan** (Settings or Home) to message us on WhatsApp. The Basic plan is ₹99 per month or ₹799 per year.
+
+**How do I pay?** The upgrade button opens WhatsApp with a ready message. We share the payment details, and activate your plan after payment.
 
 **Is GST calculated automatically?** No. Your GSTIN prints on the receipt, but tax is not calculated or split. See limits.
 
@@ -624,7 +683,7 @@ Caption starter: *"Bill banao, print karo, WhatsApp karo. Sirf 10 second mein. 1
 
 ---
 
-## 16. Tech stack and project structure
+## 17. Tech stack and project structure
 
 **Stack:** React 18, Vite 5, React Router 6, Supabase (database, authentication, file storage), jsPDF (PDF invoices), qrcode (UPI QR), Vercel (hosting and serverless API), Gmail API (admin alert emails).
 
@@ -647,8 +706,8 @@ sf-billing/
       ItemsPage.jsx         Item names catalog
       SettingsPage.jsx      Shop profile, UPI, paper width
       ConnectPrinterPage.jsx  3-step printer guide in English, Hindi, Marathi
-    components/             ShopGate (approval/trial gate), Toast, LoginShowcase
-    lib/                    supabase client, auth and shop context, print, bill helpers, roles
+    components/             ShopGate (approval/trial gate), Toast, LoginShowcase, PlanCard (plan + upgrade button)
+    lib/                    supabase client, auth and shop context, print, bill helpers, roles, plans (prices + upgrade WhatsApp link)
   index.html, vite.config.js, vercel.json, package.json, .env.example
 ```
 
@@ -669,7 +728,7 @@ sf-billing/
 
 ---
 
-## 17. Deploy and configuration
+## 18. Deploy and configuration
 
 1. Deploy the **sf-admin-dash** repo first: it owns the database migrations (0001, 0002) and the DB workflow.
 2. Push this folder to its own GitHub repo, then in Vercel: Add New Project, import it (Vite). Add the environment variables below.
@@ -705,7 +764,7 @@ The `/api` functions run on Vercel. For local testing of printing and signup, us
 
 ---
 
-## 18. Developer notes
+## 19. Developer notes
 
 - **Printing flow:** the browser calls `/api/print-token` with the user's login, receives a 5-minute signed token, then opens `my.bluetoothprint.scheme://<origin>/api/print-bill?id=...&t=...`. The printer app fetches the receipt JSON from `/api/print-bill`, which checks the token and that the shop is allowed to write.
 - **Receipt width:** 58 mm uses 32 characters, 80 mm uses 48 characters. The UPI QR size also changes with paper width.
@@ -717,6 +776,7 @@ The `/api` functions run on Vercel. For local testing of printing and signup, us
 - **Storage keys on the phone:** in-progress bills (so Resume works), round-off preference, and printer-guide language (`sf_printer_lang`).
 - **Write guard:** `guardWrite()` blocks printing, sharing and exports in view-only mode, and the print API re-checks this on the server.
 - **CSV exports** are protected against spreadsheet formula injection.
+- **Plans:** `src/lib/plans.js` holds the Basic plan price, features, the upgrade WhatsApp number and `planState()` (paid, trial or ended, from the `entitlements` row). `PlanCard` is used on Settings and Home, and `ShopGate` shows the upgrade link in its banner.
 - **Printer guide languages:** to add another language, add a new entry to the `T` object and the `LANGS` list in `src/pages/ConnectPrinterPage.jsx`.
 
 ---
