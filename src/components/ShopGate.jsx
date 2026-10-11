@@ -1,5 +1,6 @@
 import { useShop } from '../lib/ShopContext'
 import { useAuth } from '../lib/AuthContext'
+import { upgradeUrl } from '../lib/plans'
 
 const wrap = { minHeight: '100vh', background: 'var(--ink)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }
 const card = { background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, padding: 32, maxWidth: 420, color: '#fff', textAlign: 'center' }
@@ -21,6 +22,7 @@ function Screen({ title, children }) {
 
 export default function ShopGate({ children, loading }) {
   const { shop, ent, canWrite, loading: busy, reload } = useShop()
+  const { user } = useAuth()
   if (busy) return loading
   if (!shop) return <Screen title="No shop found">This account is not linked to a shop. Please contact Stellar Forge.</Screen>
   if (shop.status === 'pending_review') return (
@@ -38,5 +40,10 @@ export default function ShopGate({ children, loading }) {
   const bar = !canWrite
     ? 'View only: your trial has ended. You can view bills, but printing, sharing, exports and new bills are off. Contact Stellar Forge to continue.'
     : onTrial && end && daysLeft(end) <= 5 ? `Free trial: ${Math.max(daysLeft(end), 0)} day(s) left.` : ''
-  return <>{bar && <div style={{ background: canWrite ? '#f59e0b' : '#ef4444', color: '#fff', padding: '8px 14px', fontSize: '0.85rem', textAlign: 'center' }}>{bar}</div>}{children}</>
+  return <>{bar && (
+    <div style={{ background: canWrite ? '#f59e0b' : '#ef4444', color: '#fff', padding: '8px 14px', fontSize: '0.85rem', textAlign: 'center' }}>
+      {bar}{' '}
+      <a href={upgradeUrl(shop, user)} target="_blank" rel="noopener noreferrer"
+        style={{ color: '#fff', fontWeight: 700, textDecoration: 'underline', whiteSpace: 'nowrap' }}>⭐ Upgrade to Basic plan</a>
+    </div>)}{children}</>
 }
