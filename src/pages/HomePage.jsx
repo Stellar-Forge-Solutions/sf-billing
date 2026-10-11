@@ -104,6 +104,9 @@ export default function HomePage() {
         <button className="btn btn-secondary btn-full" onClick={() => navigate('/items')}>
           📦 Manage Items
         </button>
+        <button className="btn btn-secondary btn-full" onClick={() => navigate('/connect-printer')}>
+          🖨️ Connect Printer
+        </button>
       </div>
 
       {/* How it works */}
