@@ -11,6 +11,7 @@ import HomePage from './pages/HomePage'
 import ItemsPage from './pages/ItemsPage'
 import BillPage from './pages/BillPage'
 import DashboardPage from './pages/DashboardPage'
+import ConnectPrinterPage from './pages/ConnectPrinterPage'
 
 function LoadingScreen() {
   return (
@@ -135,6 +136,7 @@ function AppShell() {
         <Route path="/scan"      element={<Navigate to="/bill" replace />} />
         <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
         <Route path="/signup"    element={<PublicRoute><SignupPage /></PublicRoute>} />
+        <Route path="/connect-printer" element={<ProtectedRoute><ConnectPrinterPage /></ProtectedRoute>} />
         <Route path="/settings"  element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
         <Route path="*"          element={<Navigate to="/" replace />} />
       </Routes>
