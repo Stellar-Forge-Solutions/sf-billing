@@ -3,6 +3,7 @@ import QRCode from 'qrcode'
 import { supabase } from '../lib/supabase'
 import { useShop } from '../lib/ShopContext'
 import { useToast } from '../components/Toast'
+import PlanCard from '../components/PlanCard'
 
 const UPI = /^[A-Za-z0-9._-]{2,}@[A-Za-z]{2,}$/
 const KEYS = ['name', 'tagline', 'address', 'mobile', 'whatsapp', 'gst_no', 'upi_id', 'website', 'thank_you', 'bill_prefix', 'paper_width', 'show_upi_qr']
@@ -66,6 +67,7 @@ export default function SettingsPage() {
     <div className="page">
       <h1 className="page-title">Shop Settings</h1>
       <p className="page-subtitle">{canWrite ? (ent?.paid_until ? 'Plan active' : 'Free trial') : 'View only'}{end && ` · until ${new Date(end).toLocaleDateString('en-IN')}`}. Changes apply to new bills; printed bills never change.</p>
+      <PlanCard />
       <div className="card" style={{ padding: 20 }}>
         <h3>Shop details</h3>
         {inp('Shop name', 'name')}{inp('Second line (tagline)', 'tagline')}{inp('Address', 'address')}
