@@ -5,6 +5,7 @@ import { useAuth } from '../lib/AuthContext'
 import { isOwner } from '../lib/roles'
 import { useShop } from '../lib/ShopContext'
 import { todayIST, billDay } from '../lib/billUtils'
+import PlanCard from '../components/PlanCard'
 
 export default function HomePage() {
   const navigate = useNavigate()
@@ -93,6 +94,9 @@ export default function HomePage() {
         ))}
       </div>
 
+      {/* Plan details + upgrade */}
+      <PlanCard compact />
+
       {/* Actions */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: 340 }}>
         <button className="btn btn-primary btn-full btn-lg" onClick={() => navigate('/bill')}>
@@ -103,6 +107,9 @@ export default function HomePage() {
         </button>
         <button className="btn btn-secondary btn-full" onClick={() => navigate('/items')}>
           📦 Manage Items
+        </button>
+        <button className="btn btn-secondary btn-full" onClick={() => navigate('/connect-printer')}>
+          🖨️ Connect Printer
         </button>
       </div>
 
