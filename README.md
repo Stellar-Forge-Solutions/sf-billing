@@ -685,16 +685,17 @@ Caption starter: *"Bill banao, print karo, WhatsApp karo. Sirf 10 second mein. 1
 
 ## 17. Tech stack and project structure
 
-**Stack:** React 18, Vite 5, React Router 6, Supabase (database, authentication, file storage), jsPDF (PDF invoices), qrcode (UPI QR), Vercel (hosting and serverless API), Gmail API (admin alert emails).
+**Stack:** React 18, Vite 5, React Router 6, Supabase (database, authentication, file storage), jsPDF (PDF invoices), qrcode (UPI QR), Cloudflare Pages (hosting and Pages Functions API), Gmail API (admin alert emails).
 
 ```
 sf-billing/
-  api/                      Vercel serverless functions
-    print-token.js          Gives a signed 5-minute token for one of the shop's own bills
-    print-bill.js           Returns the receipt JSON that the Thermer app prints
-    signup.js               Self-signup, spam checks, creates user + pending shop, alerts admins
+  functions/                Cloudflare Pages Functions (served under /api)
+    api/print-token.js      Gives a signed 5-minute token for one of the shop's own bills
+    api/print-bill.js       Returns the receipt JSON that the Thermer app prints
+    api/signup.js           Self-signup, spam checks, creates user + pending shop, alerts admins
     _lib/gmail.js           Sends admin emails through the Gmail API
-  public/                   PWA manifest, service worker, icons, logo
+    _lib/http.js            JSON response helper
+  public/                   PWA manifest, service worker, icons, logo, _redirects (SPA fallback)
   src/
     App.jsx                 Routes, top navigation, access guards
     pages/
@@ -708,7 +709,7 @@ sf-billing/
       ConnectPrinterPage.jsx  3-step printer guide in English, Hindi, Marathi
     components/             ShopGate (approval/trial gate), Toast, LoginShowcase, PlanCard (plan + upgrade button)
     lib/                    supabase client, auth and shop context, print, bill helpers, roles, plans (prices + upgrade WhatsApp link)
-  index.html, vite.config.js, vercel.json, package.json, .env.example
+  index.html, vite.config.js, wrangler.toml, package.json, .env.example, .dev.vars (local only, not committed)
 ```
 
 **Routes**
@@ -731,8 +732,8 @@ sf-billing/
 ## 18. Deploy and configuration
 
 1. Deploy the **sf-admin-dash** repo first: it owns the database migrations (0001, 0002) and the DB workflow.
-2. Push this folder to its own GitHub repo, then in Vercel: Add New Project, import it (Vite). Add the environment variables below.
-3. In Supabase, go to Authentication, Providers, Email and turn **OFF** "Allow new users to sign up" (signup goes through `/api/signup`). Set the Site URL to your Vercel URL.
+2. Push this folder to its own GitHub repo, then in Cloudflare: Workers & Pages, Create, Pages, Connect to Git, pick the repo. Build command `npm run build`, output directory `dist`. Add the environment variables below (Settings, Variables and Secrets). Add the server-only ones as **Encrypted**.
+3. In Supabase, go to Authentication, Providers, Email and turn **OFF** "Allow new users to sign up" (signup goes through `/api/signup`). Set the Site URL to your Cloudflare Pages URL (or custom domain) and add it to the redirect URLs.
 4. Password-reset emails use Supabase's built-in mail until you set a custom SMTP in Supabase.
 5. Printing: keep using the Thermer app. **Settings > Paper width** (58 or 80 mm) controls the receipt layout.
 
@@ -760,7 +761,7 @@ npm run build     # production build
 npm run preview   # preview the build
 ```
 
-The `/api` functions run on Vercel. For local testing of printing and signup, use `vercel dev`.
+The `/api` functions run as Cloudflare Pages Functions. For local testing of printing and signup, put the server-only values in a `.dev.vars` file (never commit it), then run `npm run build` and `npx wrangler pages dev dist`. The `VITE_*` values must be in `.env` at build time, because Vite bakes them into the app.
 
 ---
 
@@ -772,7 +773,7 @@ The `/api` functions run on Vercel. For local testing of printing and signup, us
 - **Round-off** is not stored. It is derived as the sub-rupee difference between the items total (less discount) and the saved total.
 - **Bill numbers** are per shop: prefix plus a 6-digit number, for example `SF-000042`. Drafts show as "Draft" until printed.
 - **Dates** use India time (IST) for "today" and for billing dates.
-- **Offline behaviour:** the service worker is network-first and caches successful GET responses. It does not cache Supabase calls, so saving still needs internet.
+- **Offline behaviour:** the service worker is network-first and caches successful GET responses. It does not cache Supabase calls or `/api` calls, so saving and printing still need internet.
 - **Storage keys on the phone:** in-progress bills (so Resume works), round-off preference, and printer-guide language (`sf_printer_lang`).
 - **Write guard:** `guardWrite()` blocks printing, sharing and exports in view-only mode, and the print API re-checks this on the server.
 - **CSV exports** are protected against spreadsheet formula injection.

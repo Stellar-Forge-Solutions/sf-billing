@@ -17,9 +17,11 @@ self.addEventListener('activate', e => {
 
 // Network-first strategy: always try network, fall back to cache
 self.addEventListener('fetch', e => {
-  // Only handle GET requests, skip Supabase API calls
+  // Only handle GET requests, skip Supabase calls
   if (e.request.method !== 'GET') return
   if (e.request.url.includes('supabase.co')) return
+  // Never cache our own API (receipts, tokens, signup)
+  if (new URL(e.request.url).pathname.startsWith('/api/')) return
 
   e.respondWith(
     fetch(e.request)
