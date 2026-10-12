@@ -2,7 +2,7 @@
 // Layout width follows the shop's paper setting (58 mm = 32 chars, 80 mm = 48 chars).
 import { createClient } from '@supabase/supabase-js'
 import { createHmac, timingSafeEqual } from 'node:crypto'
-import { json } from '../_lib/http.js'
+import { json } from './_lib/http.js'
 
 const pad = (str, len, right = false) => { const s = String(str).substring(0, len); return right ? s.padStart(len) : s.padEnd(len) }
 const text = (content, { bold = 0, align = 0, format = 0 } = {}) => ({ type: 0, content, bold, align, format })

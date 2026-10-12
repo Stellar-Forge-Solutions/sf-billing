@@ -2,7 +2,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { createHmac } from 'node:crypto'
 
-import { json } from '../_lib/http.js'
+import { json } from './_lib/http.js'
 
 export async function onRequest({ request, env }) {
   if (request.method !== 'POST') return new Response(null, { status: 405 })

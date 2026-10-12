@@ -1,7 +1,7 @@
 // Self-signup: creates the auth user + a pending shop (no email code), then alerts both admins via Gmail.
 import { createClient } from '@supabase/supabase-js'
-import { sendMail } from '../_lib/gmail.js'
-import { json } from '../_lib/http.js'
+import { sendMail } from './_lib/gmail.js'
+import { json } from './_lib/http.js'
 
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
 const DISPOSABLE = new Set(['mailinator.com', 'guerrillamail.com', '10minutemail.com', 'tempmail.com', 'yopmail.com', 'trashmail.com', 'sharklasers.com', 'getnada.com'])
