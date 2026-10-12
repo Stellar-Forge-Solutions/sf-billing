@@ -2,3 +2,12 @@ name = "sf-billing"
 pages_build_output_dir = "dist"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
+
+# Public browser credentials (safe to commit: the anon key ships in the JS bundle
+# anyway and all tables are protected by RLS). These mirror .env.production so the
+# Functions runtime also has them; note the browser bundle is built by Vite, which
+# inlines VITE_* at BUILD time, so .env.production is what actually feeds the frontend.
+[vars]
+VITE_SUPABASE_URL = "https://bnntkretjjqwoagysejn.supabase.co"
+VITE_SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJubnRrcmV0ampxd29hZ3lzZWpuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE3MDYxNzcsImV4cCI6MjEwNzI4MjE3N30.eAtS_h6GGIMwF3K4B89cyRPdJmXaIZhLGMD2Rx__f6M"
+
