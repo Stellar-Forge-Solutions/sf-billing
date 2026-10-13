@@ -94,9 +94,6 @@ export default function HomePage() {
         ))}
       </div>
 
-      {/* Plan details + upgrade */}
-      <PlanCard compact />
-
       {/* Actions */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%', maxWidth: 340 }}>
         <button className="btn btn-primary btn-full btn-lg" onClick={() => navigate('/bill')}>
@@ -130,6 +127,11 @@ export default function HomePage() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Plan details + upgrade (kept at the bottom so the daily actions come first) */}
+      <div style={{ marginTop: 40, width: '100%', display: 'flex', justifyContent: 'center' }}>
+        <PlanCard compact />
       </div>
     </div>
   )
