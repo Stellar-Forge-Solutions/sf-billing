@@ -16,16 +16,21 @@ function validToken(id, t, secret) {
   return a.length === b.length && timingSafeEqual(a, b)
 }
 
-export async function onRequestGet({ request, env }) {
+const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, OPTIONS', 'Access-Control-Allow-Headers': '*' }
+const j = (data, status = 200) => json(data, status, CORS)
+
+// onRequest (not onRequestGet) so OPTIONS/HEAD behave like the old Vercel handler, which ran for every method.
+export async function onRequest({ request, env }) {
+  if (request.method === 'OPTIONS') return new Response(null, { status: 200, headers: CORS })
   const q = new URL(request.url).searchParams
   const id = String(q.get('id') || '')
-  if (!id || !validToken(id, q.get('t'), env.PRINT_SIGNING_SECRET)) return json({ error: 'Invalid or expired print link' }, 401)
+  if (!id || !validToken(id, q.get('t'), env.PRINT_SIGNING_SECRET)) return j({ error: 'Invalid or expired print link' }, 401)
 
   const sb = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY, { auth: { persistSession: false } })
   const { data: bill } = await sb.from('bills').select('*').eq('id', id).maybeSingle()
-  if (!bill) return json({ error: 'Bill not found' }, 404)
+  if (!bill) return j({ error: 'Bill not found' }, 404)
   const { data: ok } = await sb.rpc('shop_can_write', { p_shop: bill.shop_id, p_product: 'billing' })
-  if (!ok) return json({ error: 'Billing is not active for this shop' }, 403)
+  if (!ok) return j({ error: 'Billing is not active for this shop' }, 403)
   const { data: live } = await sb.from('shops').select('*').eq('id', bill.shop_id).single()
   const { data: items = [] } = await sb.from('bill_items').select('*').eq('bill_id', id).order('created_at')
 
@@ -87,5 +92,5 @@ export async function onRequestGet({ request, env }) {
   rows.push(BLANK); rows.push(BLANK)
 
   const payload = {}; rows.forEach((r, i) => { payload[i] = r })
-  return json(payload, 200, { 'Access-Control-Allow-Origin': '*' })
+  return j(payload)
 }
