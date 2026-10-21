@@ -46,14 +46,14 @@ export default function LoginPage() {
         <img src="/sf-mark-light.png" alt="" style={{ width: 56 }} />
         <div style={{ color: 'var(--white)', fontSize: '1.15rem', fontWeight: 700, letterSpacing: '0.3em', marginTop: 8 }}>STELLAR FORGE</div>
         <div style={{ color: 'var(--teal)', fontSize: '0.72rem', fontWeight: 600, letterSpacing: '0.25em', marginTop: 4 }}>BILLING</div>
-        <div className="sf-badge" style={{ marginTop: 18 }}>15-day free trial · No card needed</div>
+        <div className="sf-badge" style={{ marginTop: 18 }}>Start free · 200 bills/mo included · No card needed</div>
         <LoginShowcase />
       </section>
 
-      {/* Right / bottom: free trial first, sign in second */}
+      {/* Right / bottom: free plan first, sign in second */}
       <section className="sf-panel">
-        <Link to="/signup" className="sf-cta">Start your 15-day free trial →</Link>
-        <p className="sf-note">We review every new shop within 1 hour (9 am – 9 pm IST) and message you on WhatsApp. Your trial starts when you are approved.</p>
+        <Link to="/signup" className="sf-cta">Start free · 200 bills/month included →</Link>
+        <p className="sf-note">We review every new shop within 1 hour (9 am – 9 pm IST) and message you on WhatsApp. Your account is ready when approved.</p>
         <div className="sf-or">Already have an account?</div>
 
       {/* Card */}

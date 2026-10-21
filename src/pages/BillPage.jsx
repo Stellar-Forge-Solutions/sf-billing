@@ -3,6 +3,9 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useToast } from '../components/Toast'
 import { useAuth } from '../lib/AuthContext'
+import { useShop } from '../lib/ShopContext'
+import { getPlan, upgradeUrl } from '../lib/plans'
+import { useMonthlyUsage } from '../lib/billCounter'
 import { bluetoothPrint } from '../lib/print'
 import { billNo } from '../lib/billUtils'
 
@@ -54,6 +57,10 @@ function BillEditor({ draftId, copyId }) {
   const toast    = useToast()
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { shop, ent } = useShop()
+  const plan = getPlan(shop, ent)
+  const usage = useMonthlyUsage(shop, plan)
+  const [continuePastLimit, setContinuePastLimit] = useState(false)
   const progressKey = `mm_bill_progress:${user?.email || 'anon'}`
   const isNew = !draftId && !copyId
 
@@ -426,13 +433,53 @@ function BillEditor({ draftId, copyId }) {
 
   // ─── Step: Start ───────────────────────────────────
   if (step === 'start') {
+    const isNewBill = !draftId && !copyId
+    const isBlocked = isNewBill && usage.isBlocked
+    const isOverLimit = isNewBill && usage.isOverLimit && !isBlocked
+
     return (
       <div style={{ minHeight: '100vh', background: 'var(--ink)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-        <div style={{ textAlign: 'center', marginBottom: 32 }}>
+        <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <div style={{ fontSize: '3.5rem', marginBottom: 12 }}>🧾</div>
           <h1 style={{ color: 'var(--white)', fontSize: '1.75rem', fontWeight: 700 }}>New Bill</h1>
           <p style={{ color: 'rgba(255,255,255,0.5)', marginTop: 6, fontSize: '0.9rem' }}>Enter customer name to start billing</p>
         </div>
+
+        {/* Short inline notice BEFORE the cashier starts a bill when over the limit or blocked */}
+        {isBlocked && (
+          <div style={{ width: '100%', maxWidth: 360, background: 'rgba(239, 68, 68, 0.15)', border: '1px solid #ef4444', borderRadius: 'var(--radius)', padding: 14, marginBottom: 18, color: '#fff', fontSize: '0.85rem' }}>
+            <div style={{ fontWeight: 700, marginBottom: 4 }}>⛔ Monthly bill limit reached</div>
+            <p style={{ margin: '0 0 10px', color: 'rgba(255,255,255,0.8)', fontSize: '0.8rem', lineHeight: 1.4 }}>
+              You've used all {usage.limit} included bills this month and your overage limit (₹{usage.overageLimitRupees}) is reached.
+            </p>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <a href={upgradeUrl(shop, user, false, 'basic')} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm btn-full" style={{ textDecoration: 'none' }}>
+                ⭐ Upgrade to Basic (₹29/mo: 600 bills)
+              </a>
+              <button className="btn btn-ghost btn-sm btn-full" style={{ color: 'rgba(255,255,255,0.7)', borderColor: 'rgba(255,255,255,0.2)' }} onClick={() => navigate('/usage')}>
+                ⚙️ Adjust overage limit
+              </button>
+            </div>
+          </div>
+        )}
+
+        {isOverLimit && !continuePastLimit && (
+          <div style={{ width: '100%', maxWidth: 360, background: 'rgba(245, 158, 11, 0.15)', border: '1px solid #f59e0b', borderRadius: 'var(--radius)', padding: 14, marginBottom: 18, color: '#fff', fontSize: '0.85rem' }}>
+            <div style={{ fontWeight: 700, marginBottom: 4 }}>⚡ Over included bills</div>
+            <p style={{ margin: '0 0 10px', color: 'rgba(255,255,255,0.85)', fontSize: '0.825rem', lineHeight: 1.4 }}>
+              You've used all {usage.limit} included bills. Extra bills cost ₹0.30 each.
+            </p>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button className="btn btn-secondary btn-sm" style={{ flex: 1 }} onClick={() => setContinuePastLimit(true)}>
+                Continue
+              </button>
+              <a href={upgradeUrl(shop, user, false, 'basic')} target="_blank" rel="noopener noreferrer" className="btn btn-primary btn-sm" style={{ flex: 1.5, textDecoration: 'none', textAlign: 'center' }}>
+                ⭐ Upgrade to Basic
+              </a>
+            </div>
+          </div>
+        )}
+
         <div style={{ width: '100%', maxWidth: 360 }}>
           {resumable && (
             <div style={{ background: 'rgba(0,201,167,0.12)', border: '1px solid var(--teal)', borderRadius: 'var(--radius)', padding: 12, marginBottom: 18 }}>
@@ -450,11 +497,12 @@ function BillEditor({ draftId, copyId }) {
             <label className="form-label" style={{ color: 'rgba(255,255,255,0.5)' }}>Customer Name</label>
             <input className="form-input" style={darkInput} placeholder="e.g. Ravi Kumar"
               value={customerName} autoFocus onChange={e => setCustomerName(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && customerName.trim() && setStep('bill')} />
+              onKeyDown={e => e.key === 'Enter' && customerName.trim() && !isBlocked && setStep('bill')}
+              disabled={isBlocked} />
             {(() => {
               const q = customerName.trim().toLowerCase()
               const list = recentCustomers.filter(n => !q || (n.toLowerCase().includes(q) && n.toLowerCase() !== q)).slice(0, 5)
-              return list.length > 0 && (
+              return list.length > 0 && !isBlocked && (
                 <div style={{ marginTop: 8 }}>
                   <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.35)', marginBottom: 4 }}>{q ? 'Matching customers' : 'Recent customers'}</div>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
@@ -470,13 +518,14 @@ function BillEditor({ draftId, copyId }) {
           <div className="form-group">
             <label className="form-label" style={{ color: 'rgba(255,255,255,0.5)' }}>Billing Date</label>
             <input type="date" className="form-input" style={{ ...darkInput, colorScheme: 'dark' }}
-              value={billingDate} max={todayIST()} onChange={e => setBillingDate(e.target.value)} />
+              value={billingDate} max={todayIST()} onChange={e => setBillingDate(e.target.value)}
+              disabled={isBlocked} />
             <div style={{ color: 'rgba(255,255,255,0.35)', fontSize: '0.75rem', marginTop: 4 }}>
               Defaults to today — pick a past date to backdate this bill.
             </div>
           </div>
           <button className="btn btn-primary btn-full btn-lg" style={{ marginTop: 8 }}
-            disabled={!customerName.trim() || !billingDate} onClick={() => setStep('bill')}>
+            disabled={!customerName.trim() || !billingDate || isBlocked} onClick={() => setStep('bill')}>
             Start Billing →
           </button>
           {lastBill && (

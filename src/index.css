@@ -273,3 +273,24 @@ tr:last-child td { border-bottom: none; }
 @keyframes sfLine { 0% { transform: scaleX(0); } 30%,100% { transform: scaleX(1); } }
 @keyframes sfFlow { from { background-position: 200% 0; } to { background-position: -200% 0; } }
 @media (prefers-reduced-motion: reduce) { .sf-glow, .sf-badge, .sf-cta, .sf-qr { animation: none; } }
+
+/* ── Ad Banner styling & print protection ── */
+.ad-container {
+  max-width: 728px;
+  width: 100%;
+  margin: 32px auto;
+  min-height: 90px;
+  border-radius: 4px;
+  background: transparent;
+}
+@media (max-width: 600px) {
+  .ad-container {
+    min-height: 50px;
+  }
+}
+@media print {
+  .ad-container, .ad-slot, .ad-label, .ad-placeholder, ins.adsbygoogle {
+    display: none !important;
+  }
+}
+

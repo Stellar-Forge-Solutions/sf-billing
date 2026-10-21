@@ -12,6 +12,7 @@ import ItemsPage from './pages/ItemsPage'
 import BillPage from './pages/BillPage'
 import DashboardPage from './pages/DashboardPage'
 import ConnectPrinterPage from './pages/ConnectPrinterPage'
+import UsagePage from './pages/UsagePage'
 
 function LoadingScreen() {
   return (
@@ -85,6 +86,9 @@ function Nav() {
         <NavLink to="/dashboard" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
           Dashboard
         </NavLink>
+        <NavLink to="/usage" className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
+          Usage
+        </NavLink>
 
         {/* User chip + sign out */}
         <div style={{
@@ -135,6 +139,7 @@ function AppShell() {
         <Route path="/bill/:id"  element={<ProtectedRoute><BillPage /></ProtectedRoute>} />
         <Route path="/scan"      element={<Navigate to="/bill" replace />} />
         <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+        <Route path="/usage"     element={<ProtectedRoute><UsagePage /></ProtectedRoute>} />
         <Route path="/signup"    element={<PublicRoute><SignupPage /></PublicRoute>} />
         <Route path="/connect-printer" element={<ProtectedRoute><ConnectPrinterPage /></ProtectedRoute>} />
         <Route path="/settings"  element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />

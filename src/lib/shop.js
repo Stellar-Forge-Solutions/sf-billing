@@ -12,7 +12,7 @@ export const billPrefix = (bill) => bill?.snapshot?.bill_prefix ?? live?.bill_pr
 
 export function guardWrite(what = 'This action') {
   if (canWrite) return true
-  alert(`${what} is unavailable: your trial has ended or the account is on hold. You can still view your bills. Contact Stellar Forge to continue.`)
+  alert(`${what} is unavailable: your account is on hold or not approved. Contact Stellar Forge to continue.`)
   return false
 }
 

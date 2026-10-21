@@ -7,6 +7,11 @@ import { isOwner } from '../lib/roles'
 import { bluetoothPrint } from '../lib/print'
 import { billTotals, billNo, billLabel, billDay, todayIST, shiftDay, matchesSearch, billsToCsv, itemsToCsv, downloadFile } from '../lib/billUtils'
 import { SHOP, applyShop, applyShopAssets, guardWrite, getLiveShop } from '../lib/shop'
+import { useShop } from '../lib/ShopContext'
+import { getPlan, ADS_CONFIG } from '../lib/plans'
+import { useMonthlyUsage } from '../lib/billCounter'
+import UsageWidget from '../components/UsageWidget'
+import AdBanner from '../components/AdBanner'
 
 // ── Logo (from ItemsPage) ─────────────────────────────────────────
 
@@ -626,6 +631,9 @@ export default function DashboardPage() {
   const toast    = useToast()
   const navigate = useNavigate()
   const { user } = useAuth()
+  const { shop, ent } = useShop()
+  const plan = getPlan(shop, ent)
+  const usage = useMonthlyUsage(shop, plan)
   const owner    = isOwner(user?.email)
   const today    = todayIST()
 
@@ -751,6 +759,9 @@ export default function DashboardPage() {
         <button className="btn btn-primary" onClick={() => navigate('/bill')}>+ New Bill</button>
       </div>
 
+      {/* Monthly bill counter & overage widget */}
+      <UsageWidget usage={usage} />
+
       <div className="stats-row" style={owner ? undefined : { gridTemplateColumns: 'repeat(2, 1fr)' }}>
         {owner && <div className="stat-card"><div className="stat-label">Sales · {periodLabel}</div><div className="stat-value teal" style={{ fontSize: '1.2rem' }}>₹{sales.toFixed(0)}</div></div>}
         <div className="stat-card"><div className="stat-label">Printed bills</div><div className="stat-value">{printed.length}</div></div>
@@ -875,6 +886,9 @@ export default function DashboardPage() {
           <button className="btn btn-sm btn-ghost" style={{ minHeight: 0, padding: '2px 8px' }} onClick={() => setLoadedSince(shiftDay(loadedSince, -30))}>Load 30 more days</button>
         </div>
       )}
+
+      {/* AdSense horizontal banner below bill history list (Free plan only, rendered when table has real data loaded) */}
+      <AdBanner slotId={ADS_CONFIG.slots.billing_history} plan={plan} hasData={!loading && visible.length > 0} />
 
       {selectedBill && (
         <BillDetailModal bill={selectedBill} owner={owner}

@@ -6,13 +6,16 @@ import { isOwner } from '../lib/roles'
 import { useShop } from '../lib/ShopContext'
 import { todayIST, billDay } from '../lib/billUtils'
 import PlanCard from '../components/PlanCard'
+import AdBanner from '../components/AdBanner'
+import { ADS_CONFIG, getPlan } from '../lib/plans'
 
 export default function HomePage() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [stats, setStats] = useState({ items: 0, bills: 0, drafts: 0 })
   const owner = isOwner(user?.email)
-  const { shop } = useShop()
+  const { shop, ent } = useShop()
+  const plan = getPlan(shop, ent)
   const [today, setToday] = useState(null)      // owner only: { sales, count }
 
   // Today's printed bills (a bill belongs to its billing date, so backdated ones don't count)
@@ -133,6 +136,9 @@ export default function HomePage() {
       <div style={{ marginTop: 40, width: '100%', display: 'flex', justifyContent: 'center' }}>
         <PlanCard compact />
       </div>
+
+      {/* AdSense horizontal banner on allowed dashboard pages (Free plan only, rendered when stats loaded) */}
+      <AdBanner slotId={ADS_CONFIG.slots.billing_dashboard} plan={plan} hasData={stats.bills > 0 || stats.items > 0} />
     </div>
   )
 }

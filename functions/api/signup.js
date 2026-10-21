@@ -55,6 +55,8 @@ export async function onRequest({ request, env }) {
   const { data: shop, error: se } = await sb.from('shops').insert({
     owner_id: u.user.id, email, email_normalized: norm, name, owner_name: owner, mobile, whatsapp,
     city, business_type: btype, ref_link: ref, review_due_at: due.toISOString(),
+    plan: 'free',
+    overage_limit_rupees: 300,
   }).select().single()
   if (se) { await sb.auth.admin.deleteUser(u.user.id); const d = se.code === '23505'; return json({ error: d ? 'This email is already registered.' : 'Could not create shop' }, d ? 409 : 500) }
 
