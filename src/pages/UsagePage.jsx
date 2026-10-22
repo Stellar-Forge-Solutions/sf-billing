@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import { useShop } from '../lib/ShopContext'
 import { useAuth } from '../lib/AuthContext'
 import { getPlan, can, upgradeUrl, fmtDate } from '../lib/plans'
-import { useMonthlyUsage } from '../lib/billCounter'
+import { useMonthlyUsage, getISTMonthBounds } from '../lib/billCounter'
+import { billNo, billLabel } from '../lib/billUtils'
 import { supabase } from '../lib/supabase'
 import { useToast } from '../components/Toast'
 import UsageWidget from '../components/UsageWidget'
@@ -18,6 +19,11 @@ export default function UsagePage() {
     shop?.overage_limit_rupees !== undefined ? String(shop.overage_limit_rupees) : '300'
   )
   const [savingLimit, setSavingLimit] = useState(false)
+
+  // Overage entries breakdown state
+  const [overageBillsList, setOverageBillsList] = useState([])
+  const [loadingEntries, setLoadingEntries] = useState(false)
+  const [showAllMonthBills, setShowAllMonthBills] = useState(false)
 
   const renewalDate = ent?.paid_until || shop?.plan_renewal_date
 
@@ -37,8 +43,36 @@ export default function UsagePage() {
     }
   }
 
+  // Fetch all bills created this month in chronological order to identify overage bills
+  useEffect(() => {
+    if (plan.monthlyBillLimit === Infinity) return
+
+    async function loadMonthlyEntries() {
+      setLoadingEntries(true)
+      const { startISO, endISO } = getISTMonthBounds()
+      const { data, error } = await supabase
+        .from('bills')
+        .select('id, bill_no, customer_name, total_amount, status, created_at, billing_date')
+        .gte('created_at', startISO)
+        .lt('created_at', endISO)
+        .order('created_at', { ascending: true }) // First created to last created
+
+      setLoadingEntries(false)
+      if (!error && data) {
+        setOverageBillsList(data)
+      }
+    }
+
+    loadMonthlyEntries()
+  }, [plan.monthlyBillLimit, usage.billCount])
+
+  // Split month bills into included vs overage
+  const includedCount = plan.monthlyBillLimit || 0
+  const includedBills = overageBillsList.slice(0, includedCount)
+  const overageEntries = overageBillsList.slice(includedCount)
+
   return (
-    <div className="page" style={{ maxWidth: 800 }}>
+    <div className="page" style={{ maxWidth: 840 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
         <div>
           <h1 className="page-title">Usage & Billing</h1>
@@ -51,7 +85,7 @@ export default function UsagePage() {
       {/* Plan Details Card */}
       <div className="card" style={{ padding: 20, marginBottom: 20 }}>
         <h3 style={{ margin: '0 0 12px' }}>Subscription Details</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
           <div>
             <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Current Plan</div>
             <div style={{ fontSize: '1.2rem', fontWeight: 700, marginTop: 2 }}>{plan.name}</div>
@@ -69,13 +103,164 @@ export default function UsagePage() {
             </div>
           </div>
           <div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Renewal / Reset Date</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Reset Date</div>
             <div style={{ fontSize: '1.2rem', fontWeight: 700, marginTop: 2 }}>
               {renewalDate ? fmtDate(renewalDate) : '1st of every month'}
             </div>
           </div>
         </div>
       </div>
+
+      {/* Overage Entries & Charges Breakdown Section */}
+      {plan.id !== 'pro' && (
+        <div className="card" style={{ padding: 20, marginBottom: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
+            <div>
+              <h3 style={{ margin: 0 }}>Overage Entries & Charges</h3>
+              <p style={{ margin: '4px 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                Detailed ledger of bills created past your {plan.monthlyBillLimit} included monthly allowance.
+              </p>
+            </div>
+            {overageEntries.length > 0 && (
+              <span
+                style={{
+                  background: 'rgba(245, 158, 11, 0.12)',
+                  color: '#b45309',
+                  padding: '4px 12px',
+                  borderRadius: 99,
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                }}
+              >
+                Accrued: ₹{(overageEntries.length * 0.30).toFixed(2)}
+              </span>
+            )}
+          </div>
+
+          {loadingEntries ? (
+            <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+              Loading monthly entries…
+            </div>
+          ) : overageEntries.length === 0 ? (
+            <div
+              style={{
+                background: 'var(--paper)',
+                padding: '20px 16px',
+                borderRadius: 'var(--radius)',
+                textAlign: 'center',
+                color: 'var(--text-muted)',
+                fontSize: '0.85rem',
+              }}
+            >
+              <div style={{ fontSize: '1.5rem', marginBottom: 6 }}>🌱</div>
+              <div style={{ fontWeight: 600, color: 'var(--ink)' }}>No overage charges this month</div>
+              <div style={{ marginTop: 2 }}>
+                You have used <b>{includedBills.length}</b> of <b>{plan.monthlyBillLimit}</b> included bills.
+                Overage entries will appear here once you exceed {plan.monthlyBillLimit} bills.
+              </div>
+            </div>
+          ) : (
+            <div>
+              {/* Overage summary card */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+                  gap: 10,
+                  background: 'var(--paper)',
+                  padding: 12,
+                  borderRadius: 'var(--radius)',
+                  marginBottom: 16,
+                  fontSize: '0.82rem',
+                }}
+              >
+                <div>
+                  <span style={{ color: 'var(--text-muted)' }}>Included bills:</span>
+                  <div style={{ fontWeight: 700, fontSize: '1rem', marginTop: 2 }}>{includedCount} / {includedCount}</div>
+                </div>
+                <div>
+                  <span style={{ color: 'var(--text-muted)' }}>Extra bills:</span>
+                  <div style={{ fontWeight: 700, fontSize: '1rem', marginTop: 2, color: 'var(--warning)' }}>+{overageEntries.length}</div>
+                </div>
+                <div>
+                  <span style={{ color: 'var(--text-muted)' }}>Rate per bill:</span>
+                  <div style={{ fontWeight: 700, fontSize: '1rem', marginTop: 2 }}>₹0.30</div>
+                </div>
+                <div>
+                  <span style={{ color: 'var(--text-muted)' }}>Total accrued:</span>
+                  <div style={{ fontWeight: 700, fontSize: '1rem', marginTop: 2, color: 'var(--teal-dark)' }}>
+                    ₹{(overageEntries.length * 0.30).toFixed(2)}
+                  </div>
+                </div>
+              </div>
+
+              {/* Table of overage bills */}
+              <div style={{ overflowX: 'auto', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
+                  <thead>
+                    <tr style={{ background: 'var(--paper)', borderBottom: '1px solid var(--border)' }}>
+                      <th style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>#</th>
+                      <th style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>Bill No</th>
+                      <th style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>Customer</th>
+                      <th style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>Date & Time</th>
+                      <th style={{ padding: '8px 10px', color: 'var(--text-muted)', textAlign: 'right' }}>Bill Amt</th>
+                      <th style={{ padding: '8px 10px', color: 'var(--text-muted)', textAlign: 'right' }}>Charge</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(showAllMonthBills ? overageBillsList : overageEntries).map((b, idx) => {
+                      const absoluteIdx = showAllMonthBills ? idx + 1 : includedCount + idx + 1
+                      const isOverage = absoluteIdx > includedCount
+                      return (
+                        <tr
+                          key={b.id}
+                          style={{
+                            borderBottom: '1px solid var(--border)',
+                            background: isOverage ? 'rgba(245, 158, 11, 0.03)' : '#ffffff',
+                          }}
+                        >
+                          <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>
+                            {absoluteIdx}
+                          </td>
+                          <td style={{ padding: '8px 10px', fontWeight: 600 }}>
+                            {billNo(b)}
+                          </td>
+                          <td style={{ padding: '8px 10px', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {b.customer_name}
+                          </td>
+                          <td style={{ padding: '8px 10px', color: 'var(--text-muted)' }}>
+                            {new Date(b.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}{' '}
+                            {new Date(b.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                          </td>
+                          <td style={{ padding: '8px 10px', textAlign: 'right', fontFamily: 'monospace', fontWeight: 600 }}>
+                            ₹{Number(b.total_amount).toFixed(2)}
+                          </td>
+                          <td style={{ padding: '8px 10px', textAlign: 'right', fontWeight: 700, color: isOverage ? '#b45309' : 'var(--teal-dark)' }}>
+                            {isOverage ? '+₹0.30' : 'Included'}
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10, fontSize: '0.78rem' }}>
+                <span style={{ color: 'var(--text-muted)' }}>
+                  Showing {showAllMonthBills ? `all ${overageBillsList.length} bills` : `${overageEntries.length} overage bills`}
+                </span>
+                <button
+                  className="btn btn-sm btn-ghost"
+                  style={{ padding: '2px 8px', fontSize: '0.78rem' }}
+                  onClick={() => setShowAllMonthBills(!showAllMonthBills)}
+                >
+                  {showAllMonthBills ? 'Show overage bills only' : 'View all bills from 1st of month'}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Overage Limit Setting */}
       {plan.id !== 'pro' && (
